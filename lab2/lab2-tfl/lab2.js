@@ -1,27 +1,28 @@
-"use strict";
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 function nfa() {
     return {
         kind: "nfa",
         symbols: "bcd",
-        initials: [2],
-        finals: [2],
+        initials: [0],
+        finals: [0],
         transitions: new Map([
-            ["0,b", [0, 2]],
-            ["1,b", [1, 2, 5]],
-            ["1,c", [4, 6]],
-            ["1,d", [0, 7]],
-            ["2,b", [1, 2, 5]],
-            ["2,c", [4, 6]],
-            ["2,d", [0, 7]],
-            ["3,b", [2]],
-            ["4,b", [2]],
-            ["4,c", [4]],
-            ["4,d", [7]],
-            ["5,b", [5]],
-            ["5,c", [6]],
-            ["6,b", [3]],
-            ["7,b", [8]],
-            ["8,d", [4]],
+            ["0,b", [0]],
+            ["0,d", [1]],
+            ["0,c", [2]],
+            ["1,b", [0]],
+            ["2,b", [0]],
+            ["2,c", [2]],
+            ["2,d", [3]],
+            ["3,b", [4]],
+            ["4,d", [2]],
         ]),
     };
 }
@@ -96,8 +97,8 @@ function afa() {
         },
     };
 }
-const regexp = /^(b*(db*|c*(dbdc*)*|b*cb)b)*$/;
-const extendedRegexp = /^((b*cbb)|(b*db+)|b*(c*(dbdc*)*)b)*$/;
+var regexp = /^(b*(db*|c*(dbdc*)*|b*cb)b)*$/;
+var extendedRegexp = /^((b*cbb)|(b*db+)|b*(c*(dbdc*)*)b)*$/;
 function checkRegex(kind, word) {
     return kind === "regex"
         ? regexp.test(word)
@@ -107,49 +108,51 @@ function randomInt(max) {
     return Math.floor(Math.random() * max);
 }
 function generateWordRandom(alphabet, minLen, maxLen) {
-    const len = minLen + randomInt(maxLen - minLen + 1);
-    return Array.from({ length: len }, () => alphabet[randomInt(alphabet.length)])
+    var len = minLen + randomInt(maxLen - minLen + 1);
+    return Array.from({ length: len }, function () { return alphabet[randomInt(alphabet.length)]; })
         .join("");
 }
 function generateWordRegex(maxBlocks, maxBOutside, maxInside) {
-    const blockCount = randomInt(maxBlocks) + 1;
-    const resultBlocks = [];
-    for (let i = 0; i < blockCount; i++) {
-        const bStart = "b".repeat(randomInt(maxBOutside + 1));
-        const choice = randomInt(3);
-        let center = "";
+    var blockCount = randomInt(maxBlocks) + 1;
+    var resultBlocks = [];
+    for (var i = 0; i < blockCount; i++) {
+        var bStart = "b".repeat(randomInt(maxBOutside + 1));
+        var choice = randomInt(3);
+        var center = "";
         switch (choice) {
             case 0: // db*
-                const bCount0 = randomInt(maxInside + 1);
+                var bCount0 = randomInt(maxInside + 1);
                 center = "d" + "b".repeat(bCount0);
                 break;
             case 1: // c*(dbdc*)*
-                const cPrefix = "c".repeat(randomInt(maxInside + 1));
-                const innerRepeats = Array.from({ length: randomInt(3) }, () => {
-                    const b1 = "b".repeat(randomInt(maxInside + 1));
-                    const b2 = "b".repeat(randomInt(maxInside + 1));
-                    const c = "c".repeat(randomInt(maxInside + 1));
+                var cPrefix = "c".repeat(randomInt(maxInside + 1));
+                var innerRepeats = Array.from({ length: randomInt(3) }, function () {
+                    var b1 = "b".repeat(randomInt(maxInside + 1));
+                    var b2 = "b".repeat(randomInt(maxInside + 1));
+                    var c = "c".repeat(randomInt(maxInside + 1));
                     return "d" + b1 + "d" + b2 + c;
                 });
                 center = cPrefix + innerRepeats.join("");
                 break;
             case 2: // b*cb
-                const bPrefix = "b".repeat(randomInt(maxInside + 1));
+                var bPrefix = "b".repeat(randomInt(maxInside + 1));
                 center = bPrefix + "c" + "b";
                 break;
         }
-        const bEnd = "b".repeat(maxBlocks);
+        var bEnd = "b".repeat(maxBlocks);
         resultBlocks.push(bStart + center + bEnd);
     }
     return resultBlocks.join("");
 }
 function step(automaton, states, symbol) {
-    const next = new Set();
-    for (const s of states) {
-        const key = `${s},${symbol}`;
-        const targets = automaton.transitions.get(key);
+    var next = new Set();
+    for (var _i = 0, states_1 = states; _i < states_1.length; _i++) {
+        var s = states_1[_i];
+        var key = "".concat(s, ",").concat(symbol);
+        var targets = automaton.transitions.get(key);
         if (targets) {
-            for (const t of targets) {
+            for (var _a = 0, targets_1 = targets; _a < targets_1.length; _a++) {
+                var t = targets_1[_a];
                 next.add(t);
             }
         }
@@ -161,14 +164,17 @@ function checkWordAutomaton(word, automaton) {
         return (checkWordAutomaton(word, automaton.prefix) &&
             checkWordAutomaton(word, automaton.main));
     }
-    let states = [...automaton.initials];
-    for (const ch of word) {
+    var states = __spreadArray([], automaton.initials, true);
+    for (var _i = 0, word_1 = word; _i < word_1.length; _i++) {
+        var ch = word_1[_i];
         states = step(automaton, states, ch);
         if (states.length === 0)
             break;
     }
-    for (const s of states) {
-        for (const f of automaton.finals) {
+    for (var _a = 0, states_2 = states; _a < states_2.length; _a++) {
+        var s = states_2[_a];
+        for (var _b = 0, _c = automaton.finals; _b < _c.length; _b++) {
+            var f = _c[_b];
             if (s === f)
                 return true;
         }
@@ -176,25 +182,23 @@ function checkWordAutomaton(word, automaton) {
     return false;
 }
 function fuzzTest(iterations) {
-    let missNfa = 0;
-    let missDfa = 0;
-    let missAfa = 0;
-    let missExt = 0;
-    for (let i = 0; i < iterations; i++) {
-        const word = Math.random() < 0.1
+    var missNfa = 0;
+    var missDfa = 0;
+    var missAfa = 0;
+    var missExt = 0;
+    for (var i = 0; i < iterations; i++) {
+        var word = Math.random() < 0.1
             ? generateWordRegex(5, 5, 5)
             : generateWordRandom("bdc", 3, 25);
-        const rRegex = checkRegex("regex", word);
-        const rNfa = checkWordAutomaton(word, nfa());
-        const rDfa = checkWordAutomaton(word, dfa());
-        const rAfa = checkWordAutomaton(word, afa());
-        const rExt = checkRegex("extregex", word);
+        var rRegex = checkRegex("regex", word);
+        var rNfa = checkWordAutomaton(word, nfa());
+        var rDfa = checkWordAutomaton(word, dfa());
+        var rAfa = checkWordAutomaton(word, afa());
+        var rExt = checkRegex("extregex", word);
         if (rNfa !== rRegex) {
             console.log("NFA mismatch:", word);
             missNfa++;
         }
-        console.log(i);
-        console.log(rDfa, "-", rRegex, "-", word);
         if (rDfa !== rRegex) {
             console.log("DFA mismatch:", word);
             missDfa++;

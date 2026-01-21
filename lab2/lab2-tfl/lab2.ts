@@ -19,33 +19,22 @@ function nfa(): Automaton {
     return {
         kind: "nfa",
         symbols: "bcd",
-        initials: [2],
-        finals: [2],
+        initials: [0],
+        finals: [0],
         transitions: new Map([
-            ["0,b", [0, 2]],
+            ["0,b", [0]],
+            ["0,d", [1]],
+            ["0,c", [2]],
 
-            ["1,b", [1, 2, 5]],
-            ["1,c", [4, 6]],
-            ["1,d", [0, 7]],
+            ["1,b", [0]],
 
-            ["2,b", [1, 2, 5]],
-            ["2,c", [4, 6]],
-            ["2,d", [0, 7]],
+            ["2,b", [0]],
+            ["2,c", [2]],
+            ["2,d", [3]],
 
-            ["3,b", [2]],
+            ["3,b", [4]],
 
-            ["4,b", [2]],
-            ["4,c", [4]],
-            ["4,d", [7]],
-
-            ["5,b", [5]],
-            ["5,c", [6]],
-
-            ["6,b", [3]],
-
-            ["7,b", [8]],
-
-            ["8,d", [4]],
+            ["4,d", [2]],
         ]),
     };
 }
@@ -249,8 +238,6 @@ function fuzzTest(iterations: number): void {
             console.log("NFA mismatch:", word);
             missNfa++;
         }
-        console.log(i);
-        console.log(rDfa, "-", rRegex, "-", word);
         if (rDfa !== rRegex) {
             console.log("DFA mismatch:", word);
             missDfa++;
