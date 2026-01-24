@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parser Benchmark</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        canvas { max-width: 800px; margin-bottom: 50px; }
+    </style>
+</head>
+<body>
+
+<h1>Parser Benchmark</h1>
+<canvas id="positiveChart"></canvas>
+<canvas id="negativeChart"></canvas>
+
+<script>
+    const results = [
+        { pool: 'positive', maxLen: 10, effective: 3.0585, naive: 6.2688 },
+        { pool: 'negative', maxLen: 10, effective: 0.2413, naive: 0.7106 },
+        { pool: 'positive', maxLen: 50, effective: 11.7089, naive: 18.6132 },
+        { pool: 'negative', maxLen: 50, effective: 1.9151, naive: 3.7917 },
+        { pool: 'positive', maxLen: 100, effective: 23.5979, naive: 36.4386 },
+        { pool: 'negative', maxLen: 100, effective: 2.9597, naive: 6.8191 },
+        { pool: 'positive', maxLen: 200, effective: 43.4024, naive: 73.1523 },
+        { pool: 'negative', maxLen: 200, effective: 5.7581, naive: 17.0704 },
+        { pool: 'positive', maxLen: 500, effective: 108.0102, naive: 200.0889 },
+        { pool: 'negative', maxLen: 500, effective: 14.3414, naive: 32.0139 }
+    ];
+
+    const positiveData = results.filter(r => r.pool === 'positive');
+    const negativeData = results.filter(r => r.pool === 'negative');
+
+    function makeChart(canvasId, data, title) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        const labels = data.map(r => r.maxLen);
+        const naiveTimes = data.map(r => r.naive);
+        const effectiveTimes = data.map(r => r.effective);
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Naive parser',
+                        data: naiveTimes,
+                        borderColor: 'red',
+                        fill: false,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Effective parser',
+                        data: effectiveTimes,
+                        borderColor: 'blue',
+                        fill: false,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title
+                    }
+                },
+                scales: {
+                    y: { title: { display: true, text: 'Time (ms)' } },
+                    x: { title: { display: true, text: 'Max word length' } }
+                }
+            }
+        });
+    }
+
+    makeChart('positiveChart', positiveData, 'Positive Pool Benchmark');
+    makeChart('negativeChart', negativeData, 'Negative Pool Benchmark');
+</script>
+
+</body>
+</html>
