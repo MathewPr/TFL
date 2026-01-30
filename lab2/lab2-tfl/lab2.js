@@ -15,14 +15,15 @@ function nfa() {
         finals: [0],
         transitions: new Map([
             ["0,b", [0]],
-            ["0,d", [1]],
-            ["0,c", [2]],
+            ["0,c", [1]],
+            ["0,d", [2]],
             ["1,b", [0]],
-            ["2,b", [0]],
-            ["2,c", [2]],
-            ["2,d", [3]],
-            ["3,b", [4]],
-            ["4,d", [2]],
+            ["1,c", [1]],
+            ["1,d", [4]],
+            ["2,b", [0, 3]],
+            ["3,d", [1]],
+            ["4,b", [5]],
+            ["5,d", [1]]
         ]),
     };
 }
@@ -98,7 +99,7 @@ function afa() {
     };
 }
 var regexp = /^(b*(db*|c*(dbdc*)*|b*cb)b)*$/;
-var extendedRegexp = /^((b*cbb)|(b*db+)|b*(c*(dbdc*)*)b)*$/;
+var extendedRegexp = /^((d|cb|c*(dbdc*)*)b+)*$/;
 function checkRegex(kind, word) {
     return kind === "regex"
         ? regexp.test(word)
@@ -127,10 +128,8 @@ function generateWordRegex(maxBlocks, maxBOutside, maxInside) {
             case 1: // c*(dbdc*)*
                 var cPrefix = "c".repeat(randomInt(maxInside + 1));
                 var innerRepeats = Array.from({ length: randomInt(3) }, function () {
-                    var b1 = "b".repeat(randomInt(maxInside + 1));
-                    var b2 = "b".repeat(randomInt(maxInside + 1));
-                    var c = "c".repeat(randomInt(maxInside + 1));
-                    return "d" + b1 + "d" + b2 + c;
+                    var cTail = "c".repeat(randomInt(maxInside + 1));
+                    return "dbd" + cTail;
                 });
                 center = cPrefix + innerRepeats.join("");
                 break;

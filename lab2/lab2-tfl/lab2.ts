@@ -23,18 +23,20 @@ function nfa(): Automaton {
         finals: [0],
         transitions: new Map([
             ["0,b", [0]],
-            ["0,d", [1]],
-            ["0,c", [2]],
+            ["0,c", [1]],
+            ["0,d", [2]],
 
             ["1,b", [0]],
+            ["1,c", [1]],
+            ["1,d", [4]],
 
-            ["2,b", [0]],
-            ["2,c", [2]],
-            ["2,d", [3]],
+            ["2,b", [0, 3]],
 
-            ["3,b", [4]],
+            ["3,d", [1]],
 
-            ["4,d", [2]],
+            ["4,b", [5]],
+
+            ["5,d", [1]]
         ]),
     };
 }
@@ -120,8 +122,8 @@ function afa(): Automaton {
 
 
 const regexp = /^(b*(db*|c*(dbdc*)*|b*cb)b)*$/;
-const extendedRegexp = /^((b*cbb)|(b*db+)|b*(c*(dbdc*)*)b)*$/;
 
+const extendedRegexp = /^((d|cb|c*(dbdc*)*)b+)*$/;
 function checkRegex(kind: "regex" | "extregex", word: string): boolean {
     return kind === "regex"
         ? regexp.test(word)
@@ -155,12 +157,13 @@ function generateWordRegex(maxBlocks: number,   maxBOutside:number, maxInside: n
 
             case 1: // c*(dbdc*)*
                 const cPrefix = "c".repeat(randomInt(maxInside + 1));
-                const innerRepeats = Array.from({ length: randomInt(3) }, () => {
-                    const b1 = "b".repeat(randomInt(maxInside + 1));
-                    const b2 = "b".repeat(randomInt(maxInside + 1));
-                    const c = "c".repeat(randomInt(maxInside + 1));
-                    return "d" + b1 + "d" + b2 + c;
-                });
+                const innerRepeats = Array.from(
+                    { length: randomInt(3) },
+                    () => {
+                        const cTail = "c".repeat(randomInt(maxInside + 1));
+                        return "dbd" + cTail;
+                    }
+                );
                 center = cPrefix + innerRepeats.join("");
                 break;
 
@@ -212,7 +215,6 @@ function checkWordAutomaton(word: string, automaton: Automaton): boolean {
             if (s === f) return true;
         }
     }
-
     return false;
 }
 
@@ -233,7 +235,6 @@ function fuzzTest(iterations: number): void {
         const rDfa = checkWordAutomaton(word, dfa());
         const rAfa = checkWordAutomaton(word, afa());
         const rExt = checkRegex("extregex", word);
-
         if (rNfa !== rRegex) {
             console.log("NFA mismatch:", word);
             missNfa++;
