@@ -88,6 +88,32 @@ function parseEffective(word: string): boolean {
     const n = word.length;
 
     for (let yLen = 0; yLen * 3 + 2 <= n; yLen++) {
+        const y = word.slice(0, yLen);
+        if (
+            word.slice(yLen, 2 * yLen) !== y ||
+            word.slice(2 * yLen, 3 * yLen) !== y
+        ) continue;
+
+        if (word[3 * yLen] !== 'a') continue;
+
+        const afterA = 3 * yLen + 1;
+
+        for (let zLen = 0; afterA + 2 * zLen + 1 <= n; zLen++) {
+            const z = word.slice(afterA, afterA + zLen);
+            if (
+                word[afterA + zLen] !== 'b' ||
+                word.slice(afterA + zLen + 1, afterA + 2 * zLen + 1) !== z
+            ) continue;
+
+            const Xlen = afterA + 2 * zLen + 1;
+            const rest = word.slice(Xlen);
+            if (rest === '' || rest === word.slice(0, Xlen)) {
+                return true;
+            }
+        }
+    }
+    /*
+    for (let yLen = 0; yLen * 3 + 2 <= n; yLen++) {
         let validY = true;
         for (let i = 0; i < yLen; i++) {
             if (word[i] !== word[i + yLen] || word[i] !== word[i + 2 * yLen]) {
@@ -126,6 +152,7 @@ function parseEffective(word: string): boolean {
             }
         }
     }
+    */
 
     return false;
 }

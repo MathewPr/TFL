@@ -85,37 +85,19 @@ function parseNaive(word) {
 function parseEffective(word) {
     var n = word.length;
     for (var yLen = 0; yLen * 3 + 2 <= n; yLen++) {
-        var validY = true;
-        for (var i = 0; i < yLen; i++) {
-            if (word[i] !== word[i + yLen] || word[i] !== word[i + 2 * yLen]) {
-                validY = false;
-                break;
-            }
-        }
-        if (!validY)
+        var y = word.slice(0, yLen);
+        if (word.slice(yLen, 2 * yLen) !== y ||
+            word.slice(2 * yLen, 3 * yLen) !== y)
             continue;
-        var posAfterY = 3 * yLen;
-        if (posAfterY >= n || word[posAfterY] !== 'a')
+        if (word[3 * yLen] !== 'a')
             continue;
-        var afterA = posAfterY + 1;
-        var maxZLen = Math.floor((n - afterA - 1) / 2);
-        for (var zLen = 0; zLen <= maxZLen; zLen++) {
-            var bPos = afterA + zLen;
-            var afterB = bPos + 1;
-            if (word[bPos] !== 'b')
+        var afterA = 3 * yLen + 1;
+        for (var zLen = 0; afterA + 2 * zLen + 1 <= n; zLen++) {
+            var z = word.slice(afterA, afterA + zLen);
+            if (word[afterA + zLen] !== 'b' ||
+                word.slice(afterA + zLen + 1, afterA + 2 * zLen + 1) !== z)
                 continue;
-            var validZ = true;
-            for (var i = 0; i < zLen; i++) {
-                if (word[afterA + i] !== word[afterB + i]) {
-                    validZ = false;
-                    break;
-                }
-            }
-            if (!validZ)
-                continue;
-            var Xlen = 3 * yLen + 1 + 2 * zLen + 1;
-            if (Xlen > n)
-                continue;
+            var Xlen = afterA + 2 * zLen + 1;
             var rest = word.slice(Xlen);
             if (rest === '' || rest === word.slice(0, Xlen)) {
                 return true;
